@@ -29,6 +29,7 @@ type WithCounter a = Integer -> (a, Integer)
 next :: WithCounter a -> (a -> WithCounter b) -> WithCounter b
 f `next` g = \i -> let (r, i') = f i in g r i'
 
+-- Added the TupleSections language extension to simplify this definition
 pure :: a -> WithCounter a
 pure x = (x,)
 
