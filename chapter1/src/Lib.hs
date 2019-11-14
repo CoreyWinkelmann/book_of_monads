@@ -4,7 +4,7 @@ module Lib where
 
 import Prelude hiding (pure)
 
--- section 1.1
+-- Section 1.1
 
 data Tree a = Leaf a | Node (Tree a) (Tree a) deriving (Show, Eq)
 
@@ -40,4 +40,13 @@ relabel' (Node l r) = relabel' l `next` \l' ->
                       relabel' r `next` \r' ->
                       pure (Node l' r')
 
--- section 1.2
+type State s a = s -> (a, s)
+
+-- Exercise 1.1
+next' :: State Integer a -> (a -> State Integer b) -> State Integer b
+f `next'` g = \i -> let (r, i') = f i in g r i'
+
+pure' :: a -> State Integer a
+pure' x = (x,)
+
+-- Section 1.2
