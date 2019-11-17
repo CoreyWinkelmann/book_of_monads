@@ -2,7 +2,7 @@
 
 module Lib where
 
-import Prelude hiding (pure)
+import Prelude hiding (pure, (++), Maybe, Just, Nothing)
 
 -- Section 1.1
 
@@ -43,10 +43,77 @@ relabel' (Node l r) = relabel' l `next` \l' ->
 type State s a = s -> (a, s)
 
 -- Exercise 1.1
-next' :: State Integer a -> (a -> State Integer b) -> State Integer b
+next' :: State s a -> (a -> State s b) -> State s b
 f `next'` g = \i -> let (r, i') = f i in g r i'
 
 pure' :: a -> State Integer a
 pure' x = (x,)
 
 -- Section 1.2
+
+length' :: [a] -> Integer
+length' [] = 0
+length' (_:xs) = 1 + length' xs
+
+-- Exercise 1.2
+(++) :: [a] -> [a] -> [a]
+(++) xs ys = foldr (:) ys xs
+
+-- Exercise 1.3
+map' :: (a -> b) -> [a] -> [b]
+map' f [] = []
+map' f (x:xs) = f x : map' f xs
+
+singleton :: a -> [a]
+singleton x = [x]
+
+concat :: [[a]] -> [a]
+concat = foldr (++) []
+
+-- Section 1.3
+
+data Maybe a = Nothing | Just a deriving (Show)
+
+type Name = String
+data Person = Person { name :: Name, age :: Integer } deriving (Show)
+
+validateName :: String -> Maybe Name
+validateName [] = Nothing
+validateName name = Just name
+
+validateAge :: Integer -> Maybe Integer
+validateAge a | a > 0 = Just a
+              | otherwise = Nothing
+
+validatePerson :: String -> Integer -> Maybe Person
+validatePerson name age = 
+  validateName name `then_` \name' ->
+    validateAge age `then_` \age' ->
+      Just $ Person name' age'
+
+-- validatePerson :: String -> Integer -> Maybe Person
+-- validatePerson name age = 
+--   case validateName name of
+--     Nothing -> Nothing
+--     Just name' -> case validateAge age of
+--       Nothing -> Nothing
+--       Just age' -> Just $ Person name' age'
+
+then_ :: Maybe a -> (a -> Maybe b) -> Maybe b
+then_ v g = case v of
+              Nothing -> Nothing
+              Just v' -> g v'
+
+map'' :: (a -> b) -> Maybe a -> Maybe b
+map'' f Nothing = Nothing
+map'' f (Just x) = Just $ f x
+
+singleton' :: a -> Maybe a
+singleton' = Just
+
+flatten' :: Maybe (Maybe a) -> Maybe a
+flatten' (Just (Just x)) = Just x
+flatten' _ = Nothing
+
+flatten'' :: Maybe (Maybe a) -> Maybe a
+flatten'' oo = then_ oo id
